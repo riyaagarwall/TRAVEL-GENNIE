@@ -1,41 +1,37 @@
 /* ==========================================================================
-   Design Tokens & Color Palette
-   Theme: Deep Ink-Blue, Sea-Teal, with Warm Sun-Yellow Accent
+   Design Tokens & Boarding-Pass Theme
+   Palette: Deep Ink-Blue (#0c1527), Sea-Teal (#0d9488), Warm Sun-Yellow (#d97706)
    ========================================================================== */
 :root {
-    /* Color Palette */
-    --color-ink: #0c1527;              /* Deep ink-blue background for header & accents */
-    --color-ink-muted: #1e293b;        /* Secondary dark slate for headings */
-    --color-teal-primary: #0d9488;     /* Sea-teal brand color */
-    --color-teal-dark: #0f766e;        /* Darker teal for button active/hover states */
-    --color-teal-light: #ccfbf1;       /* Light teal background tint */
-    --color-accent-sun: #d97706;       /* Warm sun-yellow accent color */
-    --color-accent-bg: #fef3c7;        /* Soft sun-yellow pill background */
+    /* Theme Colors */
+    --color-ink: #0c1527;              /* Deep ink-blue for header & strong titles */
+    --color-ink-muted: #1e293b;        /* Slate text for labels and headings */
+    --color-teal: #0d9488;             /* Sea-teal primary theme color */
+    --color-teal-dark: #0f766e;        /* Darker teal for buttons & themes */
+    --color-teal-light: #f0fdfa;       /* Soft sea-teal background tint */
+    --color-accent-sun: #d97706;       /* Warm sun-yellow (only for route markers & costs) */
 
-    /* Neutrals & Surfaces */
-    --color-bg: #f8fafc;               /* Crisp neutral page background */
-    --color-surface: #ffffff;          /* White card surface */
-    --color-border: #e2e8f0;           /* Clean subtle border */
-    --color-border-focus: #0d9488;     /* Teal border for focused inputs */
-    --color-text-main: #1e293b;        /* Main dark text */
-    --color-text-muted: #64748b;       /* Muted text for captions and notes */
+    /* Surfaces & Borders */
+    --color-bg: #f8fafc;               /* Clean neutral canvas */
+    --color-surface: #ffffff;          /* Pure white card surface */
+    --color-border: #e2e8f0;           /* Subtle border */
+    --color-border-subtle: #f1f5f9;    /* Ultra-light row separator */
+    --color-text-main: #334155;        /* Balanced body text */
+    --color-text-muted: #64748b;       /* Muted text for times, placeholders, notes */
 
-    /* Status Colors */
-    --color-error: #b91c1c;            /* Accessible dark red for error text */
-    --color-error-bg: #fef2f2;         /* Soft red alert container */
-    --color-error-border: #fecaca;     /* Soft red border */
+    /* Status Alert */
+    --color-error: #b91c1c;
+    --color-error-bg: #fef2f2;
+    --color-error-border: #fecaca;
 
-    /* Typography & Spacing */
-    --font-family: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Typography */
+    --font-family: 'Bricolage Grotesque', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --shadow-subtle: 0 1px 3px rgba(12, 21, 39, 0.05), 0 4px 12px rgba(12, 21, 39, 0.03);
-    --shadow-card: 0 4px 16px rgba(12, 21, 39, 0.06);
+    --radius-md: 8px;
 }
 
 /* ==========================================================================
-   Global Resets & Base Styles
+   Global Reset & Typography
    ========================================================================== */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -53,65 +49,53 @@ body {
     flex-direction: column;
 }
 
-/* Clear, accessible focus outlines for keyboard navigation */
+h1, h2, h3, h4, input, select, button, textarea {
+    font-family: var(--font-family);
+}
+
+/* Visible keyboard focus for accessibility */
 :focus-visible {
-    outline: 2px solid var(--color-teal-primary);
+    outline: 2px solid var(--color-teal);
     outline-offset: 2px;
 }
 
 /* ==========================================================================
-   Site Header
+   Site Header (Wordmark only)
    ========================================================================== */
 .site-header {
     background-color: var(--color-ink);
     color: #ffffff;
-    padding: 1rem 1.5rem;
-    border-bottom: 2px solid var(--color-teal-primary);
+    padding: 1.15rem 1.5rem;
+    border-bottom: 2px solid var(--color-teal);
 }
 
 .header-inner {
-    max-width: 1200px;
+    max-width: 1160px;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
 .site-logo {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 800;
     letter-spacing: -0.02em;
     color: #ffffff;
 }
 
-.site-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background-color: rgba(13, 148, 136, 0.25);
-    color: var(--color-teal-light);
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    border: 1px solid rgba(13, 148, 136, 0.4);
-}
-
 /* ==========================================================================
-   Main Layout (Two Columns: Form Left, Itinerary Right)
+   Two-Column Layout
    ========================================================================== */
 .app-layout {
-    max-width: 1200px;
+    max-width: 1160px;
     width: 100%;
     margin: 2rem auto;
     padding: 0 1.5rem;
     display: grid;
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 370px 1fr;
     gap: 2.5rem;
     align-items: start;
     flex: 1;
 }
 
-/* Responsive: Single Column on Tablet & Mobile */
 @media (max-width: 860px) {
     .app-layout {
         grid-template-columns: 1fr;
@@ -122,39 +106,38 @@ body {
 }
 
 /* ==========================================================================
-   Left Column: Form Container & Elements
+   Left Column: Form Controls
    ========================================================================== */
 .form-column {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 1.75rem;
-    box-shadow: var(--shadow-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
     position: sticky;
     top: 1.5rem;
 }
 
 .form-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .form-title {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.35rem;
+    font-weight: 800;
     color: var(--color-ink);
     line-height: 1.25;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.35rem;
 }
 
 .form-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: var(--color-text-muted);
 }
 
 .trip-form {
     display: flex;
     flex-direction: column;
-    gap: 1.15rem;
+    gap: 1rem;
 }
 
 .field-group {
@@ -170,71 +153,63 @@ body {
 }
 
 label {
-    font-size: 0.825rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--color-ink-muted);
-    letter-spacing: -0.01em;
 }
 
 input[type="text"],
 input[type="number"],
 select {
-    font-family: inherit;
     font-size: 0.95rem;
     color: var(--color-text-main);
     background-color: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    padding: 0.65rem 0.8rem;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    padding: 0.65rem 0.75rem;
+    transition: border-color 0.15s ease;
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 select:focus {
-    border-color: var(--color-border-focus);
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    border-color: var(--color-teal);
 }
 
 /* Submit Button */
 .submit-btn {
-    font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    background-color: var(--color-teal-primary);
+    background-color: var(--color-teal);
     color: #ffffff;
     border: none;
     border-radius: var(--radius-sm);
     padding: 0.85rem 1.25rem;
     cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background-color 0.15s ease, transform 0.05s ease;
+    margin-top: 0.35rem;
+    transition: background-color 0.15s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
     background-color: var(--color-teal-dark);
 }
 
-.submit-btn:active:not(:disabled) {
-    transform: scale(0.99);
-}
-
 .submit-btn:disabled {
     background-color: var(--color-text-muted);
-    opacity: 0.75;
+    opacity: 0.7;
     cursor: not-allowed;
 }
 
 /* Error Alert Box */
 .status-message {
     display: none;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-error);
     background-color: var(--color-error-bg);
     border: 1px solid var(--color-error-border);
     border-radius: var(--radius-sm);
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.9rem;
     line-height: 1.4;
 }
 
@@ -243,25 +218,85 @@ select:focus {
 }
 
 /* ==========================================================================
-   Right Column: Itinerary Results & Placeholders
+   Right Column: Empty State & Flight Path Loading State
    ========================================================================== */
 .itinerary-column {
-    min-height: 400px;
+    min-height: 380px;
 }
 
-/* Default Empty State */
+/* Empty State */
 .itinerary-placeholder {
     background-color: var(--color-surface);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 4rem 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 4.5rem 1.5rem;
     text-align: center;
+}
+
+.placeholder-route-svg {
+    display: block;
+    margin: 0 auto 1rem;
+}
+
+.placeholder-text {
+    font-size: 0.95rem;
     color: var(--color-text-muted);
-    font-size: 1rem;
     font-weight: 500;
 }
 
-/* Itinerary Results Container */
+/* Loading State: Dotted Flight Path with traveling dot */
+.itinerary-loading {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 4.5rem 1.5rem;
+    text-align: center;
+}
+
+.loading-flight-path {
+    position: relative;
+    width: 140px;
+    height: 16px;
+    margin: 0 auto 0.85rem;
+}
+
+.loading-flight-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 2px dotted var(--color-teal);
+    transform: translateY(-50%);
+}
+
+.loading-flight-dot {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-accent-sun);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: flightMove 1.6s ease-in-out infinite;
+}
+
+@keyframes flightMove {
+    0% { left: 0%; opacity: 0.2; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { left: 100%; opacity: 0.2; }
+}
+
+.loading-text {
+    font-size: 0.95rem;
+    color: var(--color-ink);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Right Column: Itinerary Results & Boarding Pass Tickets
+   ========================================================================== */
 .itinerary-results {
     display: flex;
     flex-direction: column;
@@ -272,119 +307,213 @@ select:focus {
 .trip-header {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-left: 5px solid var(--color-teal-primary);
     border-radius: var(--radius-md);
-    padding: 1.5rem 1.75rem;
-    box-shadow: var(--shadow-subtle);
+    padding: 1.35rem 1.5rem;
+}
+
+.demo-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: var(--color-teal-light);
+    color: var(--color-teal-dark);
+    border: 1px solid var(--color-teal);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
 }
 
 .trip-title {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     font-weight: 800;
     color: var(--color-ink);
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
+    margin-bottom: 0.35rem;
+    line-height: 1.25;
 }
 
 .trip-summary {
-    font-size: 0.975rem;
+    font-size: 0.925rem;
     color: var(--color-text-main);
-    line-height: 1.6;
+    line-height: 1.55;
+    max-width: 75ch;
 }
 
-/* Day Cards List */
+/* Dotted Route Line connecting Days */
 .days-container {
+    position: relative;
+    padding-left: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.35rem;
 }
 
+/* Continuous vertical dotted route line */
+.days-container::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 1.25rem;
+    bottom: 1.25rem;
+    width: 0;
+    border-left: 2px dotted var(--color-teal);
+}
+
+/* Boarding Pass Day Ticket */
 .day-card {
+    position: relative;
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px dashed var(--color-border);
     border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-subtle);
+    overflow: visible;
+    animation: ticketReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--stagger-delay, 0s);
 }
 
+@keyframes ticketReveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Route Marker Node on the vertical line */
+.day-route-marker {
+    position: absolute;
+    left: -2rem;
+    top: 1.05rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-accent-sun);
+    border: 2px solid var(--color-bg);
+    box-shadow: 0 0 0 2px var(--color-teal);
+    transform: translateX(-50%);
+}
+
+/* Ticket Header Strip */
 .day-card-header {
+    position: relative;
     display: flex;
+    justify-content: space-between;
     align-items: baseline;
-    gap: 0.75rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.85rem;
-    margin-bottom: 1rem;
+    padding: 0.9rem 1.25rem;
+    background-color: var(--color-teal-light);
+    border-bottom: 1.5px dashed var(--color-border);
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
 }
 
-.day-badge {
-    background-color: var(--color-ink);
-    color: #ffffff;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-sm);
-    letter-spacing: 0.02em;
-    white-space: nowrap;
+.day-flight-no {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
 }
 
 .day-theme {
-    font-size: 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-teal-dark);
+    text-align: right;
+}
+
+/* Semicircle Notches at the divider line */
+.day-notch-left,
+.day-notch-right {
+    position: absolute;
+    bottom: -8px;
+    width: 14px;
+    height: 14px;
+    background-color: var(--color-bg);
+    border: 1px dashed var(--color-border);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.day-notch-left {
+    left: -8px;
+}
+
+.day-notch-right {
+    right: -8px;
+}
+
+/* Activities List (Ticket body) */
+.activities-list {
+    padding: 0.5rem 1.25rem 0.75rem;
+}
+
+/* Activity Ticket Row: 3-column layout (Time | Title + Desc | Cost) */
+.activity-row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.activity-row:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.activity-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.activity-title {
+    font-size: 0.925rem;
     font-weight: 700;
     color: var(--color-ink);
 }
 
-/* Activity Items */
-.activities-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.activity-item {
-    background-color: #fbfcfd;
-    border: 1px solid #edf2f7;
-    border-radius: var(--radius-sm);
-    padding: 0.85rem 1rem;
-}
-
-.activity-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.35rem;
-}
-
-.activity-time-pill {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--color-teal-dark);
-    background-color: var(--color-teal-light);
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-}
-
-.activity-cost-pill {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-accent-sun);
-    background-color: var(--color-accent-bg);
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-}
-
-.activity-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--color-ink-muted);
-    margin-bottom: 0.25rem;
-}
-
 .activity-desc {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     color: var(--color-text-main);
     line-height: 1.45;
+    max-width: 65ch;
+}
+
+.activity-cost {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-accent-sun);
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Responsive Activity Row for Mobile */
+@media (max-width: 560px) {
+    .days-container {
+        padding-left: 1.5rem;
+    }
+    .days-container::before {
+        left: 6px;
+    }
+    .day-route-marker {
+        left: -1.5rem;
+    }
+    .activity-row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+    .activity-cost {
+        text-align: left;
+    }
 }
 
 /* Tips Section */
@@ -392,15 +521,14 @@ select:focus {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-subtle);
+    padding: 1.25rem 1.5rem;
 }
 
 .tips-title {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--color-ink);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
 }
 
 .tips-list {
@@ -408,13 +536,14 @@ select:focus {
     padding-left: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.45rem;
 }
 
 .tips-list li {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: var(--color-text-main);
     line-height: 1.5;
+    max-width: 75ch;
 }
 
 /* Disclaimer Note Under Results */
@@ -422,7 +551,7 @@ select:focus {
     font-size: 0.8rem;
     color: var(--color-text-muted);
     text-align: center;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
 }
 
 /* ==========================================================================
@@ -430,9 +559,11 @@ select:focus {
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+    }
+    .loading-flight-dot {
+        left: 50% !important;
+        opacity: 1 !important;
     }
 }

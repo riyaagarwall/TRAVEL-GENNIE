@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TravelGenie - AI Travel Planner</title>
+    <title>TravelGenie - Travel Planner</title>
     
-    <!-- Google Font: Bricolage Grotesque -->
+    <!-- Google Font: Bricolage Grotesque (weights 400, 600, 800) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
     
     <!-- Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Top Header -->
+    <!-- Top Header (Wordmark only) -->
     <header class="site-header">
         <div class="header-inner">
             <span class="site-logo">TravelGenie</span>
-            <span class="site-badge">AI Trip Planner</span>
         </div>
     </header>
 
@@ -99,7 +98,7 @@
 
                 <!-- Submit Button -->
                 <button type="submit" id="submit-btn" class="submit-btn">
-                    Plan my trip
+                    <span class="btn-text">Plan my trip</span>
                 </button>
 
                 <!-- Status & Error Alert Container -->
@@ -110,11 +109,26 @@
         <!-- Right Column: Itinerary Results Display -->
         <section class="itinerary-column" aria-label="Generated Itinerary">
             
-            <!-- Default Placeholder State (Before generating) -->
+            <!-- Default Empty State: Route arc SVG & prompt -->
             <div id="itinerary-placeholder" class="itinerary-placeholder">
                 <div class="placeholder-content">
-                    <p class="placeholder-text">Your itinerary will appear here.</p>
+                    <!-- Clean inline SVG route path between two points -->
+                    <svg class="placeholder-route-svg" width="130" height="42" viewBox="0 0 130 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="12" cy="30" r="4" fill="#0d9488" />
+                        <circle cx="118" cy="12" r="4" fill="#d97706" />
+                        <path d="M 12 30 Q 65 -8 118 12" stroke="#0d9488" stroke-width="2" stroke-dasharray="4 4" fill="none" />
+                    </svg>
+                    <p class="placeholder-text">Pick a destination to see your route.</p>
                 </div>
+            </div>
+
+            <!-- Loading State: Dotted flight path with traveling dot -->
+            <div id="itinerary-loading" class="itinerary-loading" hidden aria-live="polite">
+                <div class="loading-flight-path">
+                    <div class="loading-flight-line"></div>
+                    <div class="loading-flight-dot"></div>
+                </div>
+                <p class="loading-text">Planning your trip...</p>
             </div>
 
             <!-- Dynamic Itinerary Output Area (Populated by app.js) -->
