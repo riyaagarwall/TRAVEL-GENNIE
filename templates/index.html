@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelGenie - AI Travel Planner</title>
+    
+    <!-- Google Font: Bricolage Grotesque -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="site-header">
+        <div class="header-inner">
+            <span class="site-logo">TravelGenie</span>
+            <span class="site-badge">AI Trip Planner</span>
+        </div>
+    </header>
+
+    <!-- Main Two-Column Layout -->
+    <main class="app-layout">
+        
+        <!-- Left Column: Trip Request Form -->
+        <section class="form-column" aria-labelledby="form-heading">
+            <div class="form-header">
+                <h1 id="form-heading" class="form-title">Where to, and for how long?</h1>
+                <p class="form-subtitle">Tell TravelGenie the basics and get a day-by-day plan you can tweak.</p>
+            </div>
+
+            <!-- User Preferences Form -->
+            <form id="trip-form" class="trip-form" novalidate>
+                
+                <!-- Destination Input -->
+                <div class="field-group">
+                    <label for="destination">Destination</label>
+                    <input 
+                        type="text" 
+                        id="destination" 
+                        name="destination" 
+                        placeholder="e.g. Tokyo, Japan" 
+                        maxlength="200" 
+                        required
+                    >
+                </div>
+
+                <!-- Days Input -->
+                <div class="field-group">
+                    <label for="days">Number of Days (1-14)</label>
+                    <input 
+                        type="number" 
+                        id="days" 
+                        name="days" 
+                        min="1" 
+                        max="14" 
+                        value="3" 
+                        required
+                    >
+                </div>
+
+                <!-- Budget & Pace in a 2-column sub-grid -->
+                <div class="field-row">
+                    <!-- Budget Selection -->
+                    <div class="field-group">
+                        <label for="budget">Budget Level</label>
+                        <select id="budget" name="budget">
+                            <option value="budget">Budget</option>
+                            <option value="mid-range" selected>Mid-range</option>
+                            <option value="luxury">Luxury</option>
+                        </select>
+                    </div>
+
+                    <!-- Travel Pace Selection -->
+                    <div class="field-group">
+                        <label for="pace">Preferred Pace</label>
+                        <select id="pace" name="pace">
+                            <option value="relaxed">Relaxed</option>
+                            <option value="balanced" selected>Balanced</option>
+                            <option value="packed">Packed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Interests Input -->
+                <div class="field-group">
+                    <label for="interests">Interests & Activities</label>
+                    <input 
+                        type="text" 
+                        id="interests" 
+                        name="interests" 
+                        placeholder="e.g. street food, museums, architecture" 
+                        maxlength="200"
+                    >
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="submit-btn">
+                    Plan my trip
+                </button>
+
+                <!-- Status & Error Alert Container -->
+                <div id="status-message" class="status-message" aria-live="polite"></div>
+            </form>
+        </section>
+
+        <!-- Right Column: Itinerary Results Display -->
+        <section class="itinerary-column" aria-label="Generated Itinerary">
+            
+            <!-- Default Placeholder State (Before generating) -->
+            <div id="itinerary-placeholder" class="itinerary-placeholder">
+                <div class="placeholder-content">
+                    <p class="placeholder-text">Your itinerary will appear here.</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Itinerary Output Area (Populated by app.js) -->
+            <div id="itinerary-results" class="itinerary-results" hidden></div>
+        </section>
+    </main>
+
+    <!-- Client-side JavaScript -->
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

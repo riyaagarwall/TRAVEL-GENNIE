@@ -2,7 +2,7 @@ import os
 import json
 import openai
 from openai import OpenAI
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 
 # Load environment variables from the .env file into the system environment
@@ -96,6 +96,12 @@ def validate_request(data):
         "style": style,
         "interests": interests
     }, None
+
+
+# Home page route: renders the main web application UI
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
 
 
 # Health check endpoint: always returns 200 OK regardless of API key presence
