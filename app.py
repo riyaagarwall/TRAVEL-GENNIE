@@ -34,10 +34,17 @@ def get_client():
         # Optional custom base URL (e.g. for proxies or alternate providers)
         base_url = os.getenv("OPENAI_BASE_URL") or None
 
-        # Instantiate the client
+        # Request timeout in seconds (default: 60)
+        try:
+            timeout_seconds = float(os.getenv("OPENAI_TIMEOUT_SECONDS") or 60)
+        except (ValueError, TypeError):
+            timeout_seconds = 60.0
+
+        # Instantiate the client with timeout
         _openai_client = OpenAI(
             api_key=api_key.strip(),
-            base_url=base_url
+            base_url=base_url,
+            timeout=timeout_seconds
         )
 
     return _openai_client
@@ -163,17 +170,25 @@ def plan_trip():
         f"Interests: {params['interests']}."
     )
 
+    # Build completion request arguments
+    completion_kwargs = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "response_format": {"type": "json_object"}
+    }
+
+    # Optional reasoning effort for reasoning models (e.g., low, medium, high)
+    reasoning_effort = os.getenv("OPENAI_REASONING_EFFORT")
+    if reasoning_effort and reasoning_effort.strip():
+        completion_kwargs["reasoning_effort"] = reasoning_effort.strip()
+
     # Attempt to call the OpenAI API with specific error handling
     try:
         client = get_client()
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            response_format={"type": "json_object"}
-        )
+        response = client.chat.completions.create(**completion_kwargs)
     except ValueError as e:
         if str(e) == "MISSING_API_KEY":
             return jsonify({"error": "The server is missing its API key."}), 500
@@ -182,6 +197,8 @@ def plan_trip():
         return jsonify({"error": "The API key was rejected."}), 500
     except openai.RateLimitError:
         return jsonify({"error": "Rate limit reached. Try again shortly."}), 429
+    except openai.APITimeoutError:
+        return jsonify({"error": "The AI took too long to respond. Please try again."}), 504
     except openai.APIConnectionError:
         return jsonify({"error": "Could not reach the AI service."}), 502
     except openai.OpenAIError:
