@@ -109,10 +109,10 @@
             </form>
         </section>
 
-        <!-- Right Column: Itinerary Results Display -->
-        <section class="itinerary-column" aria-label="Generated Itinerary">
+        <!-- Right Column: Single Results Panel (shows empty, loading, or itinerary) -->
+        <section class="itinerary-column" id="results-panel" aria-label="Generated Itinerary">
             
-            <!-- Default Empty State: Route arc SVG & prompt -->
+            <!-- State 1: Default Empty State (Route arc SVG & prompt) -->
             <div id="itinerary-placeholder" class="itinerary-placeholder">
                 <div class="placeholder-content">
                     <!-- Clean inline SVG route path between two points -->
@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <!-- Loading State: Dotted flight path with traveling dot -->
+            <!-- State 2: Loading State (Dotted flight path with traveling dot) -->
             <div id="itinerary-loading" class="itinerary-loading" hidden aria-live="polite">
                 <div class="loading-flight-path">
                     <div class="loading-flight-line"></div>
@@ -134,7 +134,7 @@
                 <p class="loading-text">Planning your trip...</p>
             </div>
 
-            <!-- Dynamic Itinerary Output Area (Populated by app.js) -->
+            <!-- State 3: Dynamic Itinerary Output Area (Populated on success) -->
             <div id="itinerary-results" class="itinerary-results" hidden></div>
         </section>
     </main>

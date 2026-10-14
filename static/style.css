@@ -39,6 +39,11 @@
     padding: 0;
 }
 
+/* Ensure hidden attribute is never overridden by display: flex */
+[hidden] {
+    display: none !important;
+}
+
 body {
     font-family: var(--font-family);
     background-color: var(--color-bg);
@@ -117,10 +122,18 @@ h1, h2, h3, h4, input, select, button, textarea {
         margin: 1.25rem auto;
         padding: 0 1rem;
     }
+
+    /* On mobile, stack normally without sticky pin */
+    .form-column {
+        position: static;
+        top: auto;
+        max-height: none;
+        overflow-y: visible;
+    }
 }
 
 /* ==========================================================================
-   Left Column: Form Controls (Distinct Sea-Teal Tint Background)
+   Left Column: Form Controls (Sticky beside results on wide screens)
    ========================================================================== */
 .form-column {
     background-color: var(--color-teal-light);
@@ -129,6 +142,8 @@ h1, h2, h3, h4, input, select, button, textarea {
     padding: 1.5rem;
     position: sticky;
     top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
 }
 
 .form-header {
@@ -232,41 +247,17 @@ select:focus {
 }
 
 /* ==========================================================================
-   Right Column: Empty State & Flight Path Loading State (Crisp White Surface)
+   Right Column: Single Results Panel (Empty, Loading, Itinerary States)
    ========================================================================== */
 .itinerary-column {
     min-height: 480px;
     display: flex;
     flex-direction: column;
+    scroll-margin-top: 1.5rem;
 }
 
-/* Empty State: Centered vertically and matches the form card height */
-.itinerary-placeholder {
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 3rem 1.5rem;
-    text-align: center;
-    min-height: 480px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex: 1;
-}
-
-.placeholder-route-svg {
-    display: block;
-    margin: 0 auto 1rem;
-}
-
-.placeholder-text {
-    font-size: 0.95rem;
-    color: var(--color-text-muted);
-    font-weight: 500;
-}
-
-/* Loading State: Centered vertically and matches form card height */
+/* Empty and Loading states share the exact same card spot and dimensions */
+.itinerary-placeholder,
 .itinerary-loading {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -279,6 +270,13 @@ select:focus {
     justify-content: center;
     align-items: center;
     flex: 1;
+}
+
+/* Explicit fallback to ensure inactive states remain hidden */
+.itinerary-placeholder[hidden],
+.itinerary-loading[hidden],
+.itinerary-results[hidden] {
+    display: none !important;
 }
 
 .loading-flight-path {

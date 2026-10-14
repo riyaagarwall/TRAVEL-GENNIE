@@ -104,7 +104,14 @@ const itineraryResults = document.getElementById("itinerary-results");
 
 // ==========================================================================
 // UI State Management Helpers
+// Exactly one results panel state is displayed at a time: "empty", "loading", or "itinerary"
 // ==========================================================================
+
+function showResultsState(state) {
+    itineraryPlaceholder.hidden = (state !== "empty");
+    itineraryLoading.hidden = (state !== "loading");
+    itineraryResults.hidden = (state !== "itinerary");
+}
 
 function showError(message) {
     statusMessage.textContent = message;
@@ -116,17 +123,14 @@ function clearError() {
     statusMessage.classList.remove("visible");
 }
 
-function setLoading(isLoading) {
-    if (isLoading) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Planning your trip...";
-        itineraryPlaceholder.hidden = true;
-        itineraryResults.hidden = true;
-        itineraryLoading.hidden = false;
+function setSubmitting(isSubmitting) {
+    submitBtn.disabled = isSubmitting;
+    const btnText = submitBtn.querySelector(".btn-text");
+    const label = isSubmitting ? "Planning your trip..." : "Plan my trip";
+    if (btnText) {
+        btnText.textContent = label;
     } else {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Plan my trip";
-        itineraryLoading.hidden = true;
+        submitBtn.textContent = label;
     }
 }
 
@@ -285,10 +289,8 @@ function renderItinerary(plan, isDemo = false) {
     disclaimerNote.textContent = "Costs are AI estimates, not live prices.";
     itineraryResults.appendChild(disclaimerNote);
 
-    // 6. Update UI visibility
-    itineraryPlaceholder.hidden = true;
-    itineraryLoading.hidden = true;
-    itineraryResults.hidden = false;
+    // 6. Transition results panel to itinerary state
+    showResultsState("itinerary");
 }
 
 
@@ -314,7 +316,9 @@ tripForm.addEventListener("submit", async (event) => {
         interests: interests
     };
 
-    setLoading(true);
+    // Hide empty state and show loading in the same spot, while keeping form usable
+    setSubmitting(true);
+    showResultsState("loading");
 
     try {
         const response = await fetch("/api/plan", {
@@ -328,21 +332,29 @@ tripForm.addEventListener("submit", async (event) => {
         const data = await response.json();
 
         if (!response.ok) {
+            // On error: show server error message in status area and show empty state again
             const errorMessage = data.error || "An unexpected error occurred. Please try again.";
             showError(errorMessage);
-            itineraryLoading.hidden = true;
-            itineraryPlaceholder.hidden = false;
+            showResultsState("empty");
             return;
         }
 
+        // On success: replace loading state with the itinerary
         renderItinerary(data, false);
+
+        // Scroll the top of the itinerary into view (smooth, but instant if prefers-reduced-motion)
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        itineraryResults.scrollIntoView({
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+            block: "start"
+        });
 
     } catch (networkError) {
         showError("Could not connect to the server. Please check your connection.");
-        itineraryLoading.hidden = true;
-        itineraryPlaceholder.hidden = false;
+        showResultsState("empty");
     } finally {
-        setLoading(false);
+        // Re-enable submit button in every case
+        setSubmitting(false);
     }
 });
 
