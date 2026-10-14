@@ -4,20 +4,22 @@
    ========================================================================== */
 :root {
     /* Theme Colors */
-    --color-ink: #0c1527;              /* Deep ink-blue for header & strong titles */
+    --color-ink: #0c1527;              /* Deep ink-blue for header, display numerals & strong titles */
     --color-ink-muted: #1e293b;        /* Slate text for labels and headings */
     --color-teal: #0d9488;             /* Sea-teal primary theme color */
     --color-teal-dark: #0f766e;        /* Darker teal for buttons & themes */
     --color-teal-light: #f0fdfa;       /* Soft sea-teal background tint */
-    --color-accent-sun: #d97706;       /* Warm sun-yellow (only for route markers & costs) */
+    --color-accent-sun: #d97706;       /* Warm sun-yellow (only for route markers) */
+    --color-accent-sun-text: #b45309;  /* Dark warm amber for costs (WCAG AA >= 4.5:1 contrast against white) */
 
     /* Surfaces & Borders */
-    --color-bg: #f8fafc;               /* Clean neutral canvas */
-    --color-surface: #ffffff;          /* Pure white card surface */
-    --color-border: #e2e8f0;           /* Subtle border */
+    --color-bg: #eef5f5;               /* Soft sea-mist tint (pale desaturated blue-green canvas) */
+    --color-surface: #ffffff;          /* Pure white ticket card surface */
+    --color-border: #cbd5e1;           /* Clean card border */
     --color-border-subtle: #f1f5f9;    /* Ultra-light row separator */
+    --color-border-ticket: #94a3b8;    /* Perforated divider & notch border */
     --color-text-main: #334155;        /* Balanced body text */
-    --color-text-muted: #64748b;       /* Muted text for times, placeholders, notes */
+    --color-text-muted: #475569;       /* Muted text for notes & secondary details (meets contrast) */
 
     /* Status Alert */
     --color-error: #b91c1c;
@@ -279,45 +281,118 @@ select:focus {
     display: none !important;
 }
 
-.loading-flight-path {
-    position: relative;
-    width: 140px;
-    height: 16px;
-    margin: 0 auto 0.85rem;
-}
-
-.loading-flight-line {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    border-top: 2px dotted var(--color-teal);
-    transform: translateY(-50%);
-}
-
-.loading-flight-dot {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 8px;
-    height: 8px;
-    background-color: var(--color-accent-sun);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: flightMove 1.6s ease-in-out infinite;
-}
-
-@keyframes flightMove {
-    0% { left: 0%; opacity: 0.2; }
-    20% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { left: 100%; opacity: 0.2; }
+/* ==========================================================================
+   Loading State: Skeleton Tickets (Three outlines that gently pulse)
+   ========================================================================== */
+.itinerary-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 1.5rem;
+    gap: 1rem;
 }
 
 .loading-text {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--color-ink);
-    font-weight: 600;
+    font-weight: 700;
+    text-align: center;
+    padding-top: 0.5rem;
+}
+
+.skeleton-tickets {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+}
+
+.skeleton-ticket {
+    background-color: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+.skeleton-ticket:nth-child(2) {
+    animation-delay: 0.25s;
+}
+
+.skeleton-ticket:nth-child(3) {
+    animation-delay: 0.5s;
+}
+
+.skeleton-header {
+    background-color: var(--color-teal-light);
+    border-bottom: 2px dashed var(--color-border);
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.skeleton-stub {
+    width: 48px;
+    height: 26px;
+    background-color: #cbd5e1;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.skeleton-body {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.skeleton-row {
+    display: grid;
+    grid-template-columns: 85px 1fr 60px;
+    gap: 1rem;
+    align-items: center;
+}
+
+.skeleton-pill {
+    height: 22px;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+}
+
+.skeleton-cost {
+    width: 50px;
+    height: 18px;
+    background-color: #e2e8f0;
+    border-radius: var(--radius-sm);
+    justify-self: end;
+}
+
+.skeleton-line {
+    height: 16px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.skeleton-title {
+    width: 55%;
+    height: 18px;
+    background-color: #cbd5e1;
+}
+
+.skeleton-short {
+    width: 70%;
+}
+
+@keyframes skeletonPulse {
+    0%, 100% {
+        opacity: 0.45;
+    }
+    50% {
+        opacity: 0.95;
+    }
 }
 
 /* ==========================================================================
@@ -327,6 +402,32 @@ select:focus {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+}
+
+/* Actions Bar & Print Button */
+.itinerary-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.print-btn {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-teal-dark);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.print-btn:hover {
+    background-color: var(--color-teal-light);
+    border-color: var(--color-teal);
 }
 
 /* Trip Header */
@@ -339,14 +440,12 @@ select:focus {
 
 .demo-badge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     background-color: var(--color-teal-light);
     color: var(--color-teal-dark);
     border: 1px solid var(--color-teal);
-    padding: 0.15rem 0.5rem;
+    padding: 0.2rem 0.55rem;
     border-radius: 4px;
     margin-bottom: 0.6rem;
 }
@@ -360,10 +459,30 @@ select:focus {
 }
 
 .trip-summary {
-    font-size: 0.925rem;
+    font-size: 0.95rem;
     color: var(--color-text-main);
     line-height: 1.55;
     max-width: 75ch;
+}
+
+/* Form Value Chips Container */
+.trip-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+}
+
+.trip-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    background-color: var(--color-teal-light);
+    border: 1px solid #ccfbf1;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
 }
 
 /* Dotted Route Line connecting Days */
@@ -397,22 +516,11 @@ select:focus {
     animation-delay: var(--stagger-delay, 0s);
 }
 
-@keyframes ticketReveal {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Route Marker Node on the vertical line */
+/* Route Marker Node on the vertical line (Sun-yellow accent only) */
 .day-route-marker {
     position: absolute;
     left: -2rem;
-    top: 1.05rem;
+    top: 1.15rem;
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -422,52 +530,70 @@ select:focus {
     transform: translateX(-50%);
 }
 
-/* Ticket Header Strip */
+/* Ticket Header Strip: Left Stub + Theme Text */
 .day-card-header {
     position: relative;
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 0.9rem 1.25rem;
+    align-items: center;
+    gap: 1.15rem;
+    padding: 0.85rem 1.25rem;
     background-color: var(--color-teal-light);
-    border-bottom: 1.5px dashed var(--color-border);
+    border-bottom: 2px dashed var(--color-border-ticket);
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
 }
 
-.day-flight-no {
-    font-size: 0.9rem;
+/* Left stub holding day number as large numeral in display weight */
+.day-stub {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding-right: 1.15rem;
+    border-right: 1.5px dashed var(--color-border-ticket);
+    flex-shrink: 0;
+}
+
+.day-stub-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-teal-dark);
+}
+
+.day-numeral {
+    font-size: 1.9rem;
     font-weight: 800;
     color: var(--color-ink);
-    letter-spacing: -0.01em;
+    line-height: 1;
 }
 
 .day-theme {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-teal-dark);
-    text-align: right;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    line-height: 1.35;
+    flex: 1;
+    min-width: 0;
 }
 
-/* Semicircle Notches at the divider line */
+/* Semicircle Notches at the divider line: background must match page background exactly */
 .day-notch-left,
 .day-notch-right {
     position: absolute;
-    bottom: -8px;
-    width: 14px;
-    height: 14px;
+    bottom: -9px;
+    width: 18px;
+    height: 18px;
     background-color: var(--color-bg);
-    border: 1px dashed var(--color-border);
+    border: 2px dashed var(--color-border-ticket);
     border-radius: 50%;
     z-index: 2;
 }
 
 .day-notch-left {
-    left: -8px;
+    left: -10px;
 }
 
 .day-notch-right {
-    right: -8px;
+    right: -10px;
 }
 
 /* Activities List (Ticket body) */
@@ -475,13 +601,13 @@ select:focus {
     padding: 0.5rem 1.25rem 0.75rem;
 }
 
-/* Activity Ticket Row: 3-column layout (Time | Title + Desc | Cost) */
+/* Activity Ticket Row: 3-column layout (Time Pill | Title + Desc | Cost) */
 .activity-row {
     display: grid;
-    grid-template-columns: 80px 1fr auto;
-    gap: 1rem;
+    grid-template-columns: 85px 1fr auto;
+    gap: 1.25rem;
     align-items: baseline;
-    padding: 0.75rem 0;
+    padding: 0.85rem 0;
     border-bottom: 1px solid var(--color-border-subtle);
 }
 
@@ -489,53 +615,81 @@ select:focus {
     border-bottom: none;
 }
 
-.activity-time {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
+.activity-time-col {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Small rounded pill for time slot */
+.activity-time-pill {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    background-color: #f1f5f9;
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .activity-details {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.35rem;
 }
 
 .activity-title {
-    font-size: 0.925rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--color-ink);
 }
 
+/* Description at 16px, line-height 1.6, max 65 characters */
 .activity-desc {
-    font-size: 0.85rem;
+    font-size: 16px;
+    line-height: 1.6;
     color: var(--color-text-main);
-    line-height: 1.45;
     max-width: 65ch;
 }
 
+/* Cost right-aligned with warm sun accent (contrast >= 4.5:1) */
 .activity-cost {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    color: var(--color-accent-sun);
+    color: var(--color-accent-sun-text);
     text-align: right;
     white-space: nowrap;
 }
 
-/* Responsive Activity Row for Mobile */
+/* Responsive Activity Row & Day Tickets for Mobile */
 @media (max-width: 560px) {
     .days-container {
-        padding-left: 1.5rem;
+        padding-left: 1.25rem;
     }
     .days-container::before {
-        left: 6px;
+        left: 5px;
     }
     .day-route-marker {
-        left: -1.5rem;
+        left: -1.25rem;
+    }
+    .day-card-header {
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+    .day-stub {
+        padding-right: 0.75rem;
+    }
+    .day-numeral {
+        font-size: 1.6rem;
+    }
+    .day-theme {
+        font-size: 0.925rem;
     }
     .activity-row {
         grid-template-columns: 1fr;
-        gap: 0.35rem;
+        gap: 0.45rem;
     }
     .activity-cost {
         text-align: left;
@@ -588,8 +742,87 @@ select:focus {
         animation: none !important;
         transition: none !important;
     }
-    .loading-flight-dot {
-        left: 50% !important;
-        opacity: 1 !important;
+    .skeleton-ticket {
+        animation: none !important;
+        opacity: 0.75 !important;
+    }
+}
+
+/* ==========================================================================
+   Print Stylesheet: Clean document for physical print or PDF saving
+   ========================================================================== */
+@media print {
+    /* Hide non-printable UI: form, header, action buttons, loading/placeholder */
+    .site-header,
+    .form-column,
+    .itinerary-actions,
+    .print-btn,
+    .itinerary-placeholder,
+    .itinerary-loading,
+    .day-route-marker,
+    .days-container::before {
+        display: none !important;
+    }
+
+    /* Clean full-width canvas */
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        min-height: auto !important;
+    }
+
+    .app-layout {
+        display: block !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .itinerary-column,
+    .itinerary-results {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Remove shadows, colored backgrounds that waste ink */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    .trip-header,
+    .day-card,
+    .day-card-header,
+    .tips-section {
+        background: transparent !important;
+        border: 1px solid #94a3b8 !important;
+    }
+
+    .day-stub {
+        border-right: 1.5px dashed #94a3b8 !important;
+    }
+
+    .day-notch-left,
+    .day-notch-right {
+        display: none !important;
+    }
+
+    .days-container {
+        padding-left: 0 !important;
+    }
+
+    /* Avoid page breaks inside day tickets */
+    .trip-header,
+    .day-card,
+    .tips-section,
+    .activity-row {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .day-card {
+        margin-bottom: 1.5rem;
     }
 }

@@ -125,13 +125,63 @@
                 </div>
             </div>
 
-            <!-- State 2: Loading State (Dotted flight path with traveling dot) -->
+            <!-- State 2: Loading State (Three skeleton ticket outlines that gently pulse) -->
             <div id="itinerary-loading" class="itinerary-loading" hidden aria-live="polite">
-                <div class="loading-flight-path">
-                    <div class="loading-flight-line"></div>
-                    <div class="loading-flight-dot"></div>
-                </div>
                 <p class="loading-text">Planning your trip...</p>
+                <div class="skeleton-tickets" aria-hidden="true">
+                    <!-- Skeleton Day Ticket 1 -->
+                    <div class="skeleton-ticket">
+                        <div class="skeleton-header">
+                            <div class="skeleton-stub"></div>
+                            <div class="skeleton-line skeleton-title"></div>
+                        </div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-row">
+                                <div class="skeleton-pill"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-cost"></div>
+                            </div>
+                            <div class="skeleton-row">
+                                <div class="skeleton-pill"></div>
+                                <div class="skeleton-line skeleton-desc skeleton-short"></div>
+                                <div class="skeleton-cost"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Skeleton Day Ticket 2 -->
+                    <div class="skeleton-ticket">
+                        <div class="skeleton-header">
+                            <div class="skeleton-stub"></div>
+                            <div class="skeleton-line skeleton-title"></div>
+                        </div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-row">
+                                <div class="skeleton-pill"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-cost"></div>
+                            </div>
+                            <div class="skeleton-row">
+                                <div class="skeleton-pill"></div>
+                                <div class="skeleton-line skeleton-desc skeleton-short"></div>
+                                <div class="skeleton-cost"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Skeleton Day Ticket 3 -->
+                    <div class="skeleton-ticket">
+                        <div class="skeleton-header">
+                            <div class="skeleton-stub"></div>
+                            <div class="skeleton-line skeleton-title"></div>
+                        </div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-row">
+                                <div class="skeleton-pill"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-cost"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- State 3: Dynamic Itinerary Output Area (Populated on success) -->

@@ -139,13 +139,27 @@ function setSubmitting(isSubmitting) {
 // Boarding Pass Itinerary Renderer (XSS-Safe DOM Construction)
 // ==========================================================================
 
-function renderItinerary(plan, isDemo = false) {
+function renderItinerary(plan, isDemo = false, submittedParams = null) {
     // 1. Clear previous itinerary content safely
     while (itineraryResults.firstChild) {
         itineraryResults.removeChild(itineraryResults.firstChild);
     }
 
-    // 2. Build Trip Header
+    // 2. Action bar with "Print or save as PDF" button
+    const actionsBar = document.createElement("div");
+    actionsBar.className = "itinerary-actions";
+
+    const printBtn = document.createElement("button");
+    printBtn.type = "button";
+    printBtn.className = "print-btn";
+    printBtn.textContent = "Print or save as PDF";
+    printBtn.addEventListener("click", () => {
+        window.print();
+    });
+    actionsBar.appendChild(printBtn);
+    itineraryResults.appendChild(actionsBar);
+
+    // 3. Build Trip Header
     const tripHeader = document.createElement("div");
     tripHeader.className = "trip-header";
 
@@ -167,9 +181,47 @@ function renderItinerary(plan, isDemo = false) {
 
     tripHeader.appendChild(titleEl);
     tripHeader.appendChild(summaryEl);
+
+    // Build small chips from submitted form values (days, budget, pace)
+    const chipsContainer = document.createElement("div");
+    chipsContainer.className = "trip-chips";
+
+    const daysCount = submittedParams?.days || (Array.isArray(plan.days) ? plan.days.length : 3);
+    const budgetVal = submittedParams?.budget || "mid-range";
+    const paceVal = submittedParams?.style || "balanced";
+
+    // Chip 1: Number of Days
+    const daysChip = document.createElement("span");
+    daysChip.className = "trip-chip";
+    daysChip.textContent = `${daysCount} ${daysCount === 1 ? "day" : "days"}`;
+    chipsContainer.appendChild(daysChip);
+
+    // Chip 2: Budget Level
+    const budgetChip = document.createElement("span");
+    budgetChip.className = "trip-chip";
+    const budgetLabels = {
+        "budget": "Budget",
+        "mid-range": "Mid-range",
+        "luxury": "Luxury"
+    };
+    budgetChip.textContent = budgetLabels[budgetVal] || `${budgetVal} budget`;
+    chipsContainer.appendChild(budgetChip);
+
+    // Chip 3: Travel Pace
+    const paceChip = document.createElement("span");
+    paceChip.className = "trip-chip";
+    const paceLabels = {
+        "relaxed": "Relaxed pace",
+        "balanced": "Balanced pace",
+        "packed": "Packed pace"
+    };
+    paceChip.textContent = paceLabels[paceVal] || `${paceVal} pace`;
+    chipsContainer.appendChild(paceChip);
+
+    tripHeader.appendChild(chipsContainer);
     itineraryResults.appendChild(tripHeader);
 
-    // 3. Build Days Container with Route Line
+    // 4. Build Days Container with Route Line
     const daysContainer = document.createElement("div");
     daysContainer.className = "days-container";
 
@@ -180,24 +232,36 @@ function renderItinerary(plan, isDemo = false) {
             dayCard.className = "day-card";
             dayCard.style.setProperty("--stagger-delay", `${index * 0.08}s`);
 
-            // Route Marker Dot
+            // Route Marker Dot (Sun-yellow accent)
             const routeMarker = document.createElement("div");
             routeMarker.className = "day-route-marker";
             dayCard.appendChild(routeMarker);
 
-            // Ticket Header Strip
+            // Ticket Header Strip: Left stub holding day number as large numeral, plus theme text
             const cardHeader = document.createElement("div");
             cardHeader.className = "day-card-header";
 
-            const flightNo = document.createElement("span");
-            flightNo.className = "day-flight-no";
-            flightNo.textContent = `Day ${dayData.day}`;
+            // Left stub
+            const dayStub = document.createElement("div");
+            dayStub.className = "day-stub";
 
+            const stubLabel = document.createElement("span");
+            stubLabel.className = "day-stub-label";
+            stubLabel.textContent = "Day";
+
+            const dayNumeral = document.createElement("span");
+            dayNumeral.className = "day-numeral";
+            dayNumeral.textContent = String(dayData.day);
+
+            dayStub.appendChild(stubLabel);
+            dayStub.appendChild(dayNumeral);
+
+            // Theme text beside numeral
             const dayTheme = document.createElement("span");
             dayTheme.className = "day-theme";
             dayTheme.textContent = dayData.theme || `Day ${dayData.day} Exploration`;
 
-            // Pure CSS Semicircle Notches
+            // Visible Semicircle Notches at perforated divider line
             const notchLeft = document.createElement("span");
             notchLeft.className = "day-notch-left";
             notchLeft.setAttribute("aria-hidden", "true");
@@ -206,7 +270,7 @@ function renderItinerary(plan, isDemo = false) {
             notchRight.className = "day-notch-right";
             notchRight.setAttribute("aria-hidden", "true");
 
-            cardHeader.appendChild(flightNo);
+            cardHeader.appendChild(dayStub);
             cardHeader.appendChild(dayTheme);
             cardHeader.appendChild(notchLeft);
             cardHeader.appendChild(notchRight);
@@ -221,12 +285,16 @@ function renderItinerary(plan, isDemo = false) {
                     const row = document.createElement("div");
                     row.className = "activity-row";
 
-                    // Time Slot (Left)
+                    // Time Slot Pill (Left)
                     const timeCol = document.createElement("div");
-                    timeCol.className = "activity-time";
-                    timeCol.textContent = act.time || "Activity";
+                    timeCol.className = "activity-time-col";
 
-                    // Details (Middle: Title & Description)
+                    const timePill = document.createElement("span");
+                    timePill.className = "activity-time-pill";
+                    timePill.textContent = act.time || "Activity";
+                    timeCol.appendChild(timePill);
+
+                    // Details (Middle: Title & Description at 16px, 1.6 line-height, ~65ch length)
                     const detailsCol = document.createElement("div");
                     detailsCol.className = "activity-details";
 
@@ -241,7 +309,7 @@ function renderItinerary(plan, isDemo = false) {
                     detailsCol.appendChild(actTitle);
                     detailsCol.appendChild(actDesc);
 
-                    // Fare / Cost (Right)
+                    // Cost (Right: right-aligned, warm sun accent)
                     const costCol = document.createElement("div");
                     costCol.className = "activity-cost";
                     costCol.textContent = act.est_cost || "—";
@@ -340,7 +408,7 @@ tripForm.addEventListener("submit", async (event) => {
         }
 
         // On success: replace loading state with the itinerary
-        renderItinerary(data, false);
+        renderItinerary(data, false, payload);
 
         // Scroll the top of the itinerary into view (smooth, but instant if prefers-reduced-motion)
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -366,6 +434,6 @@ tripForm.addEventListener("submit", async (event) => {
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("demo") === "1" || urlParams.get("demo") === "true") {
-        renderItinerary(DEMO_ITINERARY, true);
+        renderItinerary(DEMO_ITINERARY, true, { days: 3, budget: "mid-range", style: "balanced" });
     }
 });
