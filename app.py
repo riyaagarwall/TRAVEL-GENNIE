@@ -40,11 +40,18 @@ def get_client():
         except (ValueError, TypeError):
             timeout_seconds = 60.0
 
-        # Instantiate the client with timeout
+        # Maximum retries for AI requests (default: 1)
+        try:
+            max_retries = int(os.getenv("OPENAI_MAX_RETRIES") or 1)
+        except (ValueError, TypeError):
+            max_retries = 1
+
+        # Instantiate the client with timeout and max_retries
         _openai_client = OpenAI(
             api_key=api_key.strip(),
             base_url=base_url,
-            timeout=timeout_seconds
+            timeout=timeout_seconds,
+            max_retries=max_retries
         )
 
     return _openai_client
@@ -148,7 +155,7 @@ def plan_trip():
         "        {\n"
         '          "time": "Morning",\n'
         '          "title": "Activity name",\n'
-        '          "description": "Short description of what to do",\n'
+        '          "description": "Short description of what to do (at most 20 words)",\n'
         '          "est_cost": "Rough cost estimate (e.g., $15 or Free)"\n'
         "        }\n"
         "      ]\n"
@@ -160,6 +167,8 @@ def plan_trip():
         f"Budget level: {params['budget']}.\n"
         f"Travel pace/style: {params['style']}.\n"
         f"Interests: {params['interests']}.\n"
+        "Each activity description must be at most 20 words.\n"
+        "The tips list must have at most 3 items.\n"
         "Use rough cost estimates rather than exact prices."
     )
 
@@ -196,7 +205,7 @@ def plan_trip():
     except openai.AuthenticationError:
         return jsonify({"error": "The API key was rejected."}), 500
     except openai.RateLimitError:
-        return jsonify({"error": "Rate limit reached. Try again shortly."}), 429
+        return jsonify({"error": "The free API limit may be used up. Please wait a minute, or try again tomorrow."}), 429
     except openai.APITimeoutError:
         return jsonify({"error": "The AI took too long to respond. Please try again."}), 504
     except openai.APIConnectionError:
@@ -230,4 +239,6 @@ def plan_trip():
 
 # Start the development server if run directly
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    # Debug mode is enabled only when FLASK_DEBUG is explicitly set to "1"
+    debug_mode = os.getenv("FLASK_DEBUG") == "1"
+    app.run(host="127.0.0.1", port=5000, debug=debug_mode)
