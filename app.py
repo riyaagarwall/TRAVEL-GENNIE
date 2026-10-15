@@ -139,6 +139,8 @@ def plan_trip():
 
     # Model name from environment variables (default: gpt-4o-mini)
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    # Optional fallback model to retry once if the primary model is busy/unavailable
+    fallback_model = os.getenv("OPENAI_FALLBACK_MODEL")
 
     # Define system prompt with JSON schema, budget, style, and interests instructions
     system_prompt = (
@@ -194,25 +196,44 @@ def plan_trip():
     if reasoning_effort and reasoning_effort.strip():
         completion_kwargs["reasoning_effort"] = reasoning_effort.strip()
 
-    # Attempt to call the OpenAI API with specific error handling
+    # Attempt to call the OpenAI API with fallback and specific error handling
     try:
         client = get_client()
-        response = client.chat.completions.create(**completion_kwargs)
+        try:
+            response = client.chat.completions.create(**completion_kwargs)
+        except openai.InternalServerError as err:
+            # If a fallback model is configured, retry once with the fallback model
+            if fallback_model and fallback_model.strip():
+                app.logger.error(f"{type(err).__name__}: {err} - retrying with fallback model {fallback_model.strip()}")
+                fallback_kwargs = {**completion_kwargs, "model": fallback_model.strip()}
+                response = client.chat.completions.create(**fallback_kwargs)
+            else:
+                raise
     except ValueError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         if str(e) == "MISSING_API_KEY":
             return jsonify({"error": "The server is missing its API key."}), 500
         return jsonify({"error": "The AI request failed. Please try again."}), 502
-    except openai.AuthenticationError:
+    except openai.AuthenticationError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "The API key was rejected."}), 500
-    except openai.RateLimitError:
+    except openai.RateLimitError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "The free API limit may be used up. Please wait a minute, or try again tomorrow."}), 429
-    except openai.APITimeoutError:
+    except openai.APITimeoutError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "The AI took too long to respond. Please try again."}), 504
-    except openai.APIConnectionError:
+    except openai.InternalServerError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
+        return jsonify({"error": "The AI service is busy right now. Please try again in a minute."}), 503
+    except openai.APIConnectionError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "Could not reach the AI service."}), 502
-    except openai.OpenAIError:
+    except openai.OpenAIError as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "The AI request failed. Please try again."}), 502
-    except Exception:
+    except Exception as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "The AI request failed. Please try again."}), 502
 
     # Extract the raw text from the AI response
@@ -221,16 +242,19 @@ def plan_trip():
     # Parse and validate the structure of the JSON returned by the AI
     try:
         itinerary_data = json.loads(raw_content)
-    except Exception:
+    except Exception as e:
+        app.logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "The AI returned an unreadable plan. Please try again."}), 502
 
     # Verify that 'days' is a non-empty list and each day has an 'activities' list
     days_list = itinerary_data.get("days") if isinstance(itinerary_data, dict) else None
     if not isinstance(days_list, list) or len(days_list) == 0:
+        app.logger.error("Invalid itinerary structure: 'days' missing or empty")
         return jsonify({"error": "The AI returned an unreadable plan. Please try again."}), 502
 
     for day_entry in days_list:
         if not isinstance(day_entry, dict) or not isinstance(day_entry.get("activities"), list):
+            app.logger.error("Invalid itinerary structure: day missing 'activities' list")
             return jsonify({"error": "The AI returned an unreadable plan. Please try again."}), 502
 
     # Return the validated itinerary data to the client
