@@ -97,33 +97,36 @@ const paceSelect = document.getElementById("pace");
 const interestsInput = document.getElementById("interests");
 const submitBtn = document.getElementById("submit-btn");
 const statusMessage = document.getElementById("status-message");
-const itineraryPlaceholder = document.getElementById("itinerary-placeholder");
-const itineraryLoading = document.getElementById("itinerary-loading");
-const itineraryResults = document.getElementById("itinerary-results");
+
+const resultsEmpty = document.getElementById("results-empty");
+const resultsLoading = document.getElementById("results-loading");
+const resultsItinerary = document.getElementById("results-itinerary");
 
 
 // ==========================================================================
 // UI State Management Helpers
-// Exactly one results panel state is displayed at a time: "empty", "loading", or "itinerary"
+// Exactly one state below the form pass at a time: empty, loading, itinerary, or error
 // ==========================================================================
 
 function showResultsState(state) {
-    itineraryPlaceholder.hidden = (state !== "empty");
-    itineraryLoading.hidden = (state !== "loading");
-    itineraryResults.hidden = (state !== "itinerary");
+    resultsEmpty.hidden = (state !== "empty");
+    resultsLoading.hidden = (state !== "loading");
+    resultsItinerary.hidden = (state !== "itinerary");
+    statusMessage.hidden = (state !== "error");
 }
 
 function showError(message) {
     statusMessage.textContent = message;
-    statusMessage.classList.add("visible");
+    showResultsState("error");
 }
 
 function clearError() {
     statusMessage.textContent = "";
-    statusMessage.classList.remove("visible");
+    statusMessage.hidden = true;
 }
 
 function setSubmitting(isSubmitting) {
+    // Disable submit button while loading, keep all form inputs interactive
     submitBtn.disabled = isSubmitting;
     const btnText = submitBtn.querySelector(".btn-text");
     const label = isSubmitting ? "Planning your trip..." : "Plan my trip";
@@ -134,6 +137,27 @@ function setSubmitting(isSubmitting) {
     }
 }
 
+// Small helper to construct SVG gold airplane icon safely
+function createPlaneIcon() {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "pass-plane-icon");
+    svg.setAttribute("width", "18");
+    svg.setAttribute("height", "18");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.6.5-1.1z");
+    svg.appendChild(path);
+
+    return svg;
+}
+
 
 // ==========================================================================
 // Boarding Pass Itinerary Renderer (XSS-Safe DOM Construction)
@@ -141,11 +165,11 @@ function setSubmitting(isSubmitting) {
 
 function renderItinerary(plan, isDemo = false, submittedParams = null) {
     // 1. Clear previous itinerary content safely
-    while (itineraryResults.firstChild) {
-        itineraryResults.removeChild(itineraryResults.firstChild);
+    while (resultsItinerary.firstChild) {
+        resultsItinerary.removeChild(resultsItinerary.firstChild);
     }
 
-    // 2. Action bar with "Print or save as PDF" button
+    // 2. Action bar with "Print or save as PDF" button above the day passes
     const actionsBar = document.createElement("div");
     actionsBar.className = "itinerary-actions";
 
@@ -157,146 +181,71 @@ function renderItinerary(plan, isDemo = false, submittedParams = null) {
         window.print();
     });
     actionsBar.appendChild(printBtn);
-    itineraryResults.appendChild(actionsBar);
+    resultsItinerary.appendChild(actionsBar);
 
-    // 3. Build Trip Header
-    const tripHeader = document.createElement("div");
-    tripHeader.className = "trip-header";
+    const totalDays = Array.isArray(plan.days) ? plan.days.length : (submittedParams?.days || 1);
 
-    // If demo data, add clear label
-    if (isDemo) {
-        const demoBadge = document.createElement("span");
-        demoBadge.className = "demo-badge";
-        demoBadge.textContent = "Demo data";
-        tripHeader.appendChild(demoBadge);
-    }
-
-    const titleEl = document.createElement("h2");
-    titleEl.className = "trip-title";
-    titleEl.textContent = plan.title || "Your Travel Route";
-
-    const summaryEl = document.createElement("p");
-    summaryEl.className = "trip-summary";
-    summaryEl.textContent = plan.summary || "";
-
-    tripHeader.appendChild(titleEl);
-    tripHeader.appendChild(summaryEl);
-
-    // Build small chips from submitted form values (days, budget, pace)
-    const chipsContainer = document.createElement("div");
-    chipsContainer.className = "trip-chips";
-
-    const daysCount = submittedParams?.days || (Array.isArray(plan.days) ? plan.days.length : 3);
-    const budgetVal = submittedParams?.budget || "mid-range";
-    const paceVal = submittedParams?.style || "balanced";
-
-    // Chip 1: Number of Days
-    const daysChip = document.createElement("span");
-    daysChip.className = "trip-chip";
-    daysChip.textContent = `${daysCount} ${daysCount === 1 ? "day" : "days"}`;
-    chipsContainer.appendChild(daysChip);
-
-    // Chip 2: Budget Level
-    const budgetChip = document.createElement("span");
-    budgetChip.className = "trip-chip";
-    const budgetLabels = {
-        "budget": "Budget",
-        "mid-range": "Mid-range",
-        "luxury": "Luxury"
-    };
-    budgetChip.textContent = budgetLabels[budgetVal] || `${budgetVal} budget`;
-    chipsContainer.appendChild(budgetChip);
-
-    // Chip 3: Travel Pace
-    const paceChip = document.createElement("span");
-    paceChip.className = "trip-chip";
-    const paceLabels = {
-        "relaxed": "Relaxed pace",
-        "balanced": "Balanced pace",
-        "packed": "Packed pace"
-    };
-    paceChip.textContent = paceLabels[paceVal] || `${paceVal} pace`;
-    chipsContainer.appendChild(paceChip);
-
-    tripHeader.appendChild(chipsContainer);
-    itineraryResults.appendChild(tripHeader);
-
-    // 4. Build Days Container with Route Line
-    const daysContainer = document.createElement("div");
-    daysContainer.className = "days-container";
-
+    // 3. Render Each Day as its own horizontal Boarding Pass
     if (Array.isArray(plan.days)) {
         plan.days.forEach((dayData, index) => {
-            // Day ticket card
-            const dayCard = document.createElement("article");
-            dayCard.className = "day-card";
-            dayCard.style.setProperty("--stagger-delay", `${index * 0.08}s`);
+            const dayPass = document.createElement("article");
+            dayPass.className = "boarding-pass day-pass";
+            dayPass.style.setProperty("--stagger-index", index);
 
-            // Route Marker Dot (Sun-yellow accent)
-            const routeMarker = document.createElement("div");
-            routeMarker.className = "day-route-marker";
-            dayCard.appendChild(routeMarker);
+            // A. Royal-blue strip across top with trip title & day theme
+            const passStrip = document.createElement("div");
+            passStrip.className = "pass-strip";
 
-            // Ticket Header Strip: Left stub holding day number as large numeral, plus theme text
-            const cardHeader = document.createElement("div");
-            cardHeader.className = "day-card-header";
+            const stripLeft = document.createElement("div");
+            stripLeft.className = "strip-left";
 
-            // Left stub
-            const dayStub = document.createElement("div");
-            dayStub.className = "day-stub";
+            stripLeft.appendChild(createPlaneIcon());
 
-            const stubLabel = document.createElement("span");
-            stubLabel.className = "day-stub-label";
-            stubLabel.textContent = "Day";
+            const titleEl = document.createElement("span");
+            titleEl.className = "strip-brand";
+            titleEl.textContent = plan.title || "TravelGenie";
+            stripLeft.appendChild(titleEl);
 
-            const dayNumeral = document.createElement("span");
-            dayNumeral.className = "day-numeral";
-            dayNumeral.textContent = String(dayData.day);
+            if (isDemo) {
+                const demoBadge = document.createElement("span");
+                demoBadge.className = "pass-sample-badge";
+                demoBadge.textContent = "Sample content";
+                stripLeft.appendChild(demoBadge);
+            }
 
-            dayStub.appendChild(stubLabel);
-            dayStub.appendChild(dayNumeral);
+            const stripRight = document.createElement("div");
+            stripRight.className = "strip-right";
 
-            // Theme text beside numeral
-            const dayTheme = document.createElement("span");
-            dayTheme.className = "day-theme";
-            dayTheme.textContent = dayData.theme || `Day ${dayData.day} Exploration`;
+            const themeEl = document.createElement("span");
+            themeEl.className = "strip-context";
+            themeEl.textContent = dayData.theme || `Day ${dayData.day}`;
+            stripRight.appendChild(themeEl);
 
-            // Visible Semicircle Notches at perforated divider line
-            const notchLeft = document.createElement("span");
-            notchLeft.className = "day-notch-left";
-            notchLeft.setAttribute("aria-hidden", "true");
+            passStrip.appendChild(stripLeft);
+            passStrip.appendChild(stripRight);
+            dayPass.appendChild(passStrip);
 
-            const notchRight = document.createElement("span");
-            notchRight.className = "day-notch-right";
-            notchRight.setAttribute("aria-hidden", "true");
+            // B. Pass Body: Main Activity Rows + Tear-Off Stub
+            const passBody = document.createElement("div");
+            passBody.className = "pass-body";
 
-            cardHeader.appendChild(dayStub);
-            cardHeader.appendChild(dayTheme);
-            cardHeader.appendChild(notchLeft);
-            cardHeader.appendChild(notchRight);
-            dayCard.appendChild(cardHeader);
-
-            // Activities List (Ticket body)
-            const activitiesList = document.createElement("div");
-            activitiesList.className = "activities-list";
+            // Main Activities Area
+            const passMain = document.createElement("div");
+            passMain.className = "pass-main";
 
             if (Array.isArray(dayData.activities)) {
                 dayData.activities.forEach((act) => {
                     const row = document.createElement("div");
                     row.className = "activity-row";
 
-                    // Time Slot Pill (Left)
-                    const timeCol = document.createElement("div");
-                    timeCol.className = "activity-time-col";
+                    // Time slot in royal blue
+                    const slotEl = document.createElement("span");
+                    slotEl.className = "activity-slot";
+                    slotEl.textContent = act.time || "Activity";
 
-                    const timePill = document.createElement("span");
-                    timePill.className = "activity-time-pill";
-                    timePill.textContent = act.time || "Activity";
-                    timeCol.appendChild(timePill);
-
-                    // Details (Middle: Title & Description at 16px, 1.6 line-height, ~65ch length)
-                    const detailsCol = document.createElement("div");
-                    detailsCol.className = "activity-details";
+                    // Details: title in ink, description in muted ink
+                    const detailsEl = document.createElement("div");
+                    detailsEl.className = "activity-details";
 
                     const actTitle = document.createElement("h4");
                     actTitle.className = "activity-title";
@@ -306,58 +255,127 @@ function renderItinerary(plan, isDemo = false, submittedParams = null) {
                     actDesc.className = "activity-desc";
                     actDesc.textContent = act.description || "";
 
-                    detailsCol.appendChild(actTitle);
-                    detailsCol.appendChild(actDesc);
+                    detailsEl.appendChild(actTitle);
+                    detailsEl.appendChild(actDesc);
 
-                    // Cost (Right: right-aligned, warm sun accent)
-                    const costCol = document.createElement("div");
-                    costCol.className = "activity-cost";
-                    costCol.textContent = act.est_cost || "—";
+                    // Cost in --gold-text
+                    const costEl = document.createElement("span");
+                    costEl.className = "activity-cost";
+                    costEl.textContent = act.est_cost || "—";
 
-                    row.appendChild(timeCol);
-                    row.appendChild(detailsCol);
-                    row.appendChild(costCol);
-                    activitiesList.appendChild(row);
+                    row.appendChild(slotEl);
+                    row.appendChild(detailsEl);
+                    row.appendChild(costEl);
+                    passMain.appendChild(row);
                 });
             }
 
-            dayCard.appendChild(activitiesList);
-            daysContainer.appendChild(dayCard);
+            // Tear-off Stub on the right: "Day", large day numeral, "of N"
+            const passStub = document.createElement("div");
+            passStub.className = "pass-stub day-stub";
+
+            const stubLabel = document.createElement("span");
+            stubLabel.className = "stub-day-label";
+            stubLabel.textContent = "Day";
+
+            const stubNumeral = document.createElement("span");
+            stubNumeral.className = "stub-day-numeral";
+            stubNumeral.textContent = String(dayData.day);
+
+            const stubTotal = document.createElement("span");
+            stubTotal.className = "stub-day-total";
+            stubTotal.textContent = `of ${totalDays}`;
+
+            passStub.appendChild(stubLabel);
+            passStub.appendChild(stubNumeral);
+            passStub.appendChild(stubTotal);
+
+            passBody.appendChild(passMain);
+            passBody.appendChild(passStub);
+            dayPass.appendChild(passBody);
+
+            // Non-mask fallback notches
+            const notchTop = document.createElement("span");
+            notchTop.className = "pass-notch-fallback-top";
+            notchTop.setAttribute("aria-hidden", "true");
+
+            const notchBottom = document.createElement("span");
+            notchBottom.className = "pass-notch-fallback-bottom";
+            notchBottom.setAttribute("aria-hidden", "true");
+
+            dayPass.appendChild(notchTop);
+            dayPass.appendChild(notchBottom);
+
+            resultsItinerary.appendChild(dayPass);
         });
     }
 
-    itineraryResults.appendChild(daysContainer);
-
-    // 4. Build Tips Section
+    // 4. Smaller Pass for Local Tips at the end
     if (Array.isArray(plan.tips) && plan.tips.length > 0) {
-        const tipsSection = document.createElement("div");
-        tipsSection.className = "tips-section";
+        const tipsPass = document.createElement("article");
+        tipsPass.className = "boarding-pass tips-pass";
+        tipsPass.style.setProperty("--stagger-index", (plan.days ? plan.days.length : 1));
 
-        const tipsTitle = document.createElement("h3");
-        tipsTitle.className = "tips-title";
-        tipsTitle.textContent = "Local Tips & Advice";
+        const passStrip = document.createElement("div");
+        passStrip.className = "pass-strip";
+
+        const stripLeft = document.createElement("div");
+        stripLeft.className = "strip-left";
+        stripLeft.appendChild(createPlaneIcon());
+
+        const brand = document.createElement("span");
+        brand.className = "strip-brand";
+        brand.textContent = "TravelGenie";
+        stripLeft.appendChild(brand);
+
+        const stripRight = document.createElement("div");
+        stripRight.className = "strip-right";
+        const stripType = document.createElement("span");
+        stripType.className = "strip-type";
+        stripType.textContent = "Local Tips & Advice";
+        stripRight.appendChild(stripType);
+
+        passStrip.appendChild(stripLeft);
+        passStrip.appendChild(stripRight);
+        tipsPass.appendChild(passStrip);
+
+        const passBody = document.createElement("div");
+        passBody.className = "pass-body";
+
+        const passMain = document.createElement("div");
+        passMain.className = "pass-main";
 
         const tipsList = document.createElement("ul");
         tipsList.className = "tips-list";
-
-        plan.tips.forEach((tipText) => {
-            const tipItem = document.createElement("li");
-            tipItem.textContent = tipText;
-            tipsList.appendChild(tipItem);
+        plan.tips.forEach((tip) => {
+            const li = document.createElement("li");
+            li.textContent = tip;
+            tipsList.appendChild(li);
         });
+        passMain.appendChild(tipsList);
 
-        tipsSection.appendChild(tipsTitle);
-        tipsSection.appendChild(tipsList);
-        itineraryResults.appendChild(tipsSection);
+        const passStub = document.createElement("div");
+        passStub.className = "pass-stub tips-stub";
+
+        const tipStubLabel = document.createElement("span");
+        tipStubLabel.className = "stub-day-label";
+        tipStubLabel.textContent = "INFO";
+
+        const tipStubCode = document.createElement("span");
+        tipStubCode.className = "stub-tips-code";
+        tipStubCode.textContent = "ADVICE";
+
+        passStub.appendChild(tipStubLabel);
+        passStub.appendChild(tipStubCode);
+
+        passBody.appendChild(passMain);
+        passBody.appendChild(passStub);
+        tipsPass.appendChild(passBody);
+
+        resultsItinerary.appendChild(tipsPass);
     }
 
-    // 5. Build Disclaimer Note
-    const disclaimerNote = document.createElement("p");
-    disclaimerNote.className = "disclaimer-note";
-    disclaimerNote.textContent = "Costs are AI estimates, not live prices.";
-    itineraryResults.appendChild(disclaimerNote);
-
-    // 6. Transition results panel to itinerary state
+    // 5. Transition to itinerary state
     showResultsState("itinerary");
 }
 
@@ -384,7 +402,7 @@ tripForm.addEventListener("submit", async (event) => {
         interests: interests
     };
 
-    // Hide empty state and show loading in the same spot, while keeping form usable
+    // Show loading state and disable submit button
     setSubmitting(true);
     showResultsState("loading");
 
@@ -400,28 +418,29 @@ tripForm.addEventListener("submit", async (event) => {
         const data = await response.json();
 
         if (!response.ok) {
-            // On error: show server error message in status area and show empty state again
+            // On error: show server error message in cream strip under the form pass
             const errorMessage = data.error || "An unexpected error occurred. Please try again.";
             showError(errorMessage);
-            showResultsState("empty");
             return;
         }
 
-        // On success: replace loading state with the itinerary
+        // On success: render day passes
         renderItinerary(data, false, payload);
 
-        // Scroll the top of the itinerary into view (smooth, but instant if prefers-reduced-motion)
-        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        itineraryResults.scrollIntoView({
-            behavior: prefersReducedMotion ? "auto" : "smooth",
-            block: "start"
-        });
+        // Staggered appearance: scroll the first day pass into view
+        const firstPass = resultsItinerary.querySelector(".day-pass");
+        if (firstPass) {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            firstPass.scrollIntoView({
+                behavior: prefersReducedMotion ? "auto" : "smooth",
+                block: "start"
+            });
+        }
 
     } catch (networkError) {
         showError("Could not connect to the server. Please check your connection.");
-        showResultsState("empty");
     } finally {
-        // Re-enable submit button in every case
+        // Button is re-enabled in every case
         setSubmitting(false);
     }
 });

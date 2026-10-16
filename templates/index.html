@@ -3,190 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TravelGenie - Travel Planner</title>
+    <title>TravelGenie - Boarding Pass Itinerary Planner</title>
     
-    <!-- Google Font: Bricolage Grotesque (weights 400, 600, 800) -->
+    <!-- Google Font: Bricolage Grotesque -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Top Header (Wordmark and Tagline) -->
-    <header class="site-header">
-        <div class="header-inner">
-            <div class="logo-group">
-                <span class="site-logo">TravelGenie</span>
-                <span class="site-tagline">Day-by-day trip plans</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Two-Column Layout -->
-    <main class="app-layout">
+    <main class="app-container">
         
-        <!-- Left Column: Trip Request Form -->
-        <section class="form-column" aria-labelledby="form-heading">
-            <div class="form-header">
-                <h1 id="form-heading" class="form-title">Where to, and for how long?</h1>
-                <p class="form-subtitle">Tell TravelGenie the basics and get a day-by-day plan you can tweak.</p>
-            </div>
-
-            <!-- User Preferences Form -->
-            <form id="trip-form" class="trip-form" novalidate>
-                
-                <!-- Destination Input -->
-                <div class="field-group">
-                    <label for="destination">Destination</label>
-                    <input 
-                        type="text" 
-                        id="destination" 
-                        name="destination" 
-                        placeholder="e.g. Tokyo, Japan" 
-                        maxlength="200" 
-                        required
-                    >
-                </div>
-
-                <!-- Days Input -->
-                <div class="field-group">
-                    <label for="days">Number of Days (1-14)</label>
-                    <input 
-                        type="number" 
-                        id="days" 
-                        name="days" 
-                        min="1" 
-                        max="14" 
-                        value="3" 
-                        required
-                    >
-                </div>
-
-                <!-- Budget & Pace in a 2-column sub-grid -->
-                <div class="field-row">
-                    <!-- Budget Selection -->
-                    <div class="field-group">
-                        <label for="budget">Budget Level</label>
-                        <select id="budget" name="budget">
-                            <option value="budget">Budget</option>
-                            <option value="mid-range" selected>Mid-range</option>
-                            <option value="luxury">Luxury</option>
-                        </select>
-                    </div>
-
-                    <!-- Travel Pace Selection -->
-                    <div class="field-group">
-                        <label for="pace">Preferred Pace</label>
-                        <select id="pace" name="pace">
-                            <option value="relaxed">Relaxed</option>
-                            <option value="balanced" selected>Balanced</option>
-                            <option value="packed">Packed</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Interests Input -->
-                <div class="field-group">
-                    <label for="interests">Interests & Activities</label>
-                    <input 
-                        type="text" 
-                        id="interests" 
-                        name="interests" 
-                        placeholder="e.g. street food, museums, architecture" 
-                        maxlength="200"
-                    >
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" id="submit-btn" class="submit-btn">
-                    <span class="btn-text">Plan my trip</span>
-                </button>
-
-                <!-- Status & Error Alert Container -->
-                <div id="status-message" class="status-message" aria-live="polite"></div>
-            </form>
-        </section>
-
-        <!-- Right Column: Single Results Panel (shows empty, loading, or itinerary) -->
-        <section class="itinerary-column" id="results-panel" aria-label="Generated Itinerary">
+        <!-- Form Boarding Pass -->
+        <section class="boarding-pass form-pass" id="form-pass" aria-label="Trip Booking Form">
             
-            <!-- State 1: Default Empty State (Route arc SVG & prompt) -->
-            <div id="itinerary-placeholder" class="itinerary-placeholder">
-                <div class="placeholder-content">
-                    <!-- Clean inline SVG route path between two points -->
-                    <svg class="placeholder-route-svg" width="130" height="42" viewBox="0 0 130 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <circle cx="12" cy="30" r="4" fill="#0d9488" />
-                        <circle cx="118" cy="12" r="4" fill="#d97706" />
-                        <path d="M 12 30 Q 65 -8 118 12" stroke="#0d9488" stroke-width="2" stroke-dasharray="4 4" fill="none" />
+            <!-- Royal-blue strip across top -->
+            <div class="pass-strip">
+                <div class="strip-left">
+                    <svg class="pass-plane-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.6.5-1.1z"/>
                     </svg>
-                    <p class="placeholder-text">Pick a destination to see your route.</p>
+                    <span class="strip-brand">TravelGenie</span>
+                </div>
+                <div class="strip-right">
+                    <span class="strip-type">Boarding pass</span>
                 </div>
             </div>
 
-            <!-- State 2: Loading State (Three skeleton ticket outlines that gently pulse) -->
-            <div id="itinerary-loading" class="itinerary-loading" hidden aria-live="polite">
-                <p class="loading-text">Planning your trip...</p>
-                <div class="skeleton-tickets" aria-hidden="true">
-                    <!-- Skeleton Day Ticket 1 -->
-                    <div class="skeleton-ticket">
-                        <div class="skeleton-header">
-                            <div class="skeleton-stub"></div>
-                            <div class="skeleton-line skeleton-title"></div>
+            <!-- Form: Main Area and Tear-Off Stub -->
+            <form id="trip-form" class="pass-form" novalidate>
+                <div class="pass-body">
+                    
+                    <!-- Main Area: Boarding-pass fields with bottom border only -->
+                    <div class="pass-main">
+                        <!-- Field 1: Destination (Large) -->
+                        <div class="pass-field field-destination">
+                            <label for="destination">Destination</label>
+                            <input 
+                                type="text" 
+                                id="destination" 
+                                name="destination" 
+                                class="input-destination"
+                                placeholder="e.g. Tokyo, Japan" 
+                                maxlength="200" 
+                                required
+                            >
                         </div>
-                        <div class="skeleton-body">
-                            <div class="skeleton-row">
-                                <div class="skeleton-pill"></div>
-                                <div class="skeleton-line skeleton-desc"></div>
-                                <div class="skeleton-cost"></div>
-                            </div>
-                            <div class="skeleton-row">
-                                <div class="skeleton-pill"></div>
-                                <div class="skeleton-line skeleton-desc skeleton-short"></div>
-                                <div class="skeleton-cost"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Skeleton Day Ticket 2 -->
-                    <div class="skeleton-ticket">
-                        <div class="skeleton-header">
-                            <div class="skeleton-stub"></div>
-                            <div class="skeleton-line skeleton-title"></div>
-                        </div>
-                        <div class="skeleton-body">
-                            <div class="skeleton-row">
-                                <div class="skeleton-pill"></div>
-                                <div class="skeleton-line skeleton-desc"></div>
-                                <div class="skeleton-cost"></div>
-                            </div>
-                            <div class="skeleton-row">
-                                <div class="skeleton-pill"></div>
-                                <div class="skeleton-line skeleton-desc skeleton-short"></div>
-                                <div class="skeleton-cost"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Skeleton Day Ticket 3 -->
-                    <div class="skeleton-ticket">
-                        <div class="skeleton-header">
-                            <div class="skeleton-stub"></div>
-                            <div class="skeleton-line skeleton-title"></div>
-                        </div>
-                        <div class="skeleton-body">
-                            <div class="skeleton-row">
-                                <div class="skeleton-pill"></div>
-                                <div class="skeleton-line skeleton-desc"></div>
-                                <div class="skeleton-cost"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- State 3: Dynamic Itinerary Output Area (Populated on success) -->
-            <div id="itinerary-results" class="itinerary-results" hidden></div>
+                        <!-- Fields 2, 3, 4: Days, Budget, Pace in a row -->
+                        <div class="pass-row">
+                            <div class="pass-field field-days">
+                                <label for="days">Days (1–14)</label>
+                                <input 
+                                    type="number" 
+                                    id="days" 
+                                    name="days" 
+                                    min="1" 
+                                    max="14" 
+                                    value="3" 
+                                    required
+                                >
+                            </div>
+
+                            <div class="pass-field field-budget">
+                                <label for="budget">Budget Level</label>
+                                <select id="budget" name="budget">
+                                    <option value="budget">Budget</option>
+                                    <option value="mid-range" selected>Mid-range</option>
+                                    <option value="luxury">Luxury</option>
+                                </select>
+                            </div>
+
+                            <div class="pass-field field-pace">
+                                <label for="pace">Travel Pace</label>
+                                <select id="pace" name="pace">
+                                    <option value="relaxed">Relaxed</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="packed">Packed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Field 5: Interests -->
+                        <div class="pass-field field-interests">
+                            <label for="interests">Interests & Activities</label>
+                            <input 
+                                type="text" 
+                                id="interests" 
+                                name="interests" 
+                                placeholder="e.g. street food, architecture, ancient temples" 
+                                maxlength="200"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Right Stub: Perforation, Barcode, Submit Button -->
+                    <div class="pass-stub">
+                        <div class="stub-meta">
+                            <span class="stub-flight-label">FLIGHT</span>
+                            <span class="stub-flight-code">TG-774</span>
+                        </div>
+
+                        <!-- Decorative Barcode (ink with a few gold bars) -->
+                        <div class="pass-barcode" aria-hidden="true">
+                            <span class="bar bar-ink thick"></span>
+                            <span class="bar bar-ink"></span>
+                            <span class="bar bar-gold thick"></span>
+                            <span class="bar bar-ink thin"></span>
+                            <span class="bar bar-ink"></span>
+                            <span class="bar bar-ink thick"></span>
+                            <span class="bar bar-gold"></span>
+                            <span class="bar bar-ink thin"></span>
+                            <span class="bar bar-gold thick"></span>
+                            <span class="bar bar-ink"></span>
+                            <span class="bar bar-ink thick"></span>
+                            <span class="bar bar-gold thin"></span>
+                            <span class="bar bar-ink"></span>
+                            <span class="bar bar-ink thick"></span>
+                            <span class="bar bar-ink"></span>
+                        </div>
+
+                        <!-- Submit Button in gold with ink text -->
+                        <button type="submit" id="submit-btn" class="submit-btn">
+                            <span class="btn-text">Plan my trip</span>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+            <!-- Fallback notches for browsers without CSS mask support -->
+            <span class="pass-notch-fallback-top" aria-hidden="true"></span>
+            <span class="pass-notch-fallback-bottom" aria-hidden="true"></span>
         </section>
+
+        <!-- Status & Error Alert Container: Cream strip under the form pass -->
+        <div id="status-message" class="pass-alert-strip" hidden aria-live="polite"></div>
+
+        <!-- Single Results Area (Directly below the form pass) -->
+        <section id="results-panel" class="results-panel" aria-label="Generated Itinerary">
+            
+            <!-- State 1: Default Empty State (Short line of cream text) -->
+            <div id="results-empty" class="results-empty">
+                <p class="empty-text">Your itinerary will appear here</p>
+            </div>
+
+            <!-- State 2: Loading State (Skeleton passes with gentle pulse + text) -->
+            <div id="results-loading" class="results-loading" hidden aria-live="polite">
+                <p class="loading-text">Planning your trip...</p>
+                <div class="skeleton-passes" aria-hidden="true">
+                    <!-- Skeleton Day Pass 1 -->
+                    <div class="boarding-pass skeleton-pass">
+                        <div class="pass-strip skeleton-strip"></div>
+                        <div class="pass-body">
+                            <div class="pass-main">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-row">
+                                    <div class="skeleton-pill"></div>
+                                    <div class="skeleton-line skeleton-desc"></div>
+                                    <div class="skeleton-pill skeleton-cost"></div>
+                                </div>
+                                <div class="skeleton-row">
+                                    <div class="skeleton-pill"></div>
+                                    <div class="skeleton-line skeleton-desc skeleton-short"></div>
+                                    <div class="skeleton-pill skeleton-cost"></div>
+                                </div>
+                            </div>
+                            <div class="pass-stub skeleton-stub-block">
+                                <div class="skeleton-numeral"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Skeleton Day Pass 2 -->
+                    <div class="boarding-pass skeleton-pass">
+                        <div class="pass-strip skeleton-strip"></div>
+                        <div class="pass-body">
+                            <div class="pass-main">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-row">
+                                    <div class="skeleton-pill"></div>
+                                    <div class="skeleton-line skeleton-desc"></div>
+                                    <div class="skeleton-pill skeleton-cost"></div>
+                                </div>
+                                <div class="skeleton-row">
+                                    <div class="skeleton-pill"></div>
+                                    <div class="skeleton-line skeleton-desc skeleton-short"></div>
+                                    <div class="skeleton-pill skeleton-cost"></div>
+                                </div>
+                            </div>
+                            <div class="pass-stub skeleton-stub-block">
+                                <div class="skeleton-numeral"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- State 3: Itinerary Boarding Passes (Populated dynamically on success) -->
+            <div id="results-itinerary" class="results-itinerary" hidden></div>
+        </section>
+
     </main>
 
     <!-- Client-side JavaScript -->
