@@ -5,12 +5,41 @@ import openai
 from openai import OpenAI
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Load environment variables from the .env file into the system environment
 load_dotenv()
 
 # Initialize the Flask web application
 app = Flask(__name__)
+
+# Wrap the app with ProxyFix to use real visitor IP behind reverse proxies (e.g. Render)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+
+# Initialize rate limiter with in-memory storage keyed by remote visitor IP
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    storage_uri="memory://",
+)
+
+
+def get_plan_rate_limits():
+    """Builds rate limit strings for the plan endpoint from environment variables."""
+    per_minute = os.getenv("PLAN_LIMIT_PER_MINUTE", "3").strip()
+    per_day = os.getenv("PLAN_LIMIT_PER_DAY", "10").strip()
+    min_rate = per_minute if "/" in per_minute else f"{per_minute}/minute"
+    day_rate = per_day if "/" in per_day else f"{per_day}/day"
+    return f"{min_rate};{day_rate}"
+
+
+# Per-visitor rate limit error handler
+@app.errorhandler(429)
+def ratelimit_exceeded(e):
+    return jsonify({"error": "You've reached the limit for now. Please wait a minute, or try again tomorrow."}), 429
+
 
 # Cache variable to hold the OpenAI client instance once created
 _openai_client = None
@@ -127,6 +156,7 @@ def health_check():
 
 # Travel planning endpoint: validates input, calls AI, and returns itinerary
 @app.route("/api/plan", methods=["POST"])
+@limiter.limit(get_plan_rate_limits)
 def plan_trip():
     # Parse incoming JSON safely (silent=True avoids crashing on malformed/missing JSON)
     data = request.get_json(silent=True)
